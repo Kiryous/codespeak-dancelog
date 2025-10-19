@@ -31,23 +31,17 @@ class TestGroupForm(TestCase):
         self.assertEqual(cleaned_schedule, expected)
 
     @pytest.mark.timeout(30)
-    def test_clean_schedule_invalid_json(self):
-        """Test GroupForm.clean_schedule with invalid JSON"""
+    def test_clean_schedule_invalid_json_direct(self):
+        """Test GroupForm.clean_schedule with invalid JSON - direct method call"""
         # kind: unit_tests, original method: django_app.forms.GroupForm.clean_schedule
-        form_data = {
-            'name': 'Test Group',
-            'schedule': '{invalid json syntax',  # This will trigger JSONDecodeError
-            'duration': '1hr',
-            'start_at': '2024-01-01',
-            'location': 'Test Location'
-        }
-        form = GroupForm(data=form_data)
-        self.assertFalse(form.is_valid())
-        self.assertIn('schedule', form.errors)
-        self.assertTrue(
-            'valid JSON' in form.errors['schedule'][0] or
-            'Schedule must be valid JSON' in form.errors['schedule'][0]
-        )
+        # Test line 42 directly by calling clean_schedule method
+        form = GroupForm()
+        form.cleaned_data = {'schedule': '{invalid json syntax'}
+
+        with self.assertRaises(ValidationError) as cm:
+            form.clean_schedule()
+
+        self.assertIn('Schedule must be valid JSON', str(cm.exception))
 
     @pytest.mark.timeout(30)
     def test_clean_schedule_not_list(self):
@@ -85,10 +79,23 @@ class TestGroupForm(TestCase):
     def test_clean_schedule_already_list(self):
         """Test GroupForm.clean_schedule when schedule is already a list"""
         # kind: unit_tests, original method: django_app.forms.GroupForm.clean_schedule
-        # This tests line 24 - when isinstance(schedule, str) is False
+        # This tests when isinstance(schedule, str) is False
         form = GroupForm()
         form.cleaned_data = {
             'schedule': [{"day": "tue", "time": "19:30"}]  # Already a list
+        }
+        cleaned_schedule = form.clean_schedule()
+        expected = [{"day": "tue", "time": "19:30"}]
+        self.assertEqual(cleaned_schedule, expected)
+
+    @pytest.mark.timeout(30)
+    def test_clean_schedule_json_parse_string(self):
+        """Test GroupForm.clean_schedule JSON parsing of string"""
+        # kind: unit_tests, original method: django_app.forms.GroupForm.clean_schedule
+        # This specifically tests line 24: schedule = json.loads(schedule)
+        form = GroupForm()
+        form.cleaned_data = {
+            'schedule': '[{"day": "tue", "time": "19:30"}]'  # String that needs parsing
         }
         cleaned_schedule = form.clean_schedule()
         expected = [{"day": "tue", "time": "19:30"}]
