@@ -11,9 +11,10 @@ class TestGroupForm(TestCase):
     """Unit tests for GroupForm"""
 
     @pytest.mark.timeout(30)
-    def test_clean_schedule_valid_json_list(self):
-        """Test GroupForm.clean_schedule with valid JSON list"""
+    def test_clean_schedule_valid_json_string(self):
+        """Test GroupForm.clean_schedule with valid JSON string"""
         # kind: unit_tests, original method: django_app.forms.GroupForm.clean_schedule
+        # This specifically tests line 24: schedule = json.loads(schedule)
         form_data = {
             'name': 'Test Group',
             'schedule': '[{"day": "tue", "time": "19:30"}, {"day": "thu", "time": "20:30"}]',
@@ -35,7 +36,7 @@ class TestGroupForm(TestCase):
         # kind: unit_tests, original method: django_app.forms.GroupForm.clean_schedule
         form_data = {
             'name': 'Test Group',
-            'schedule': 'invalid json',
+            'schedule': '{invalid json syntax',  # This will trigger JSONDecodeError
             'duration': '1hr',
             'start_at': '2024-01-01',
             'location': 'Test Location'
@@ -43,7 +44,10 @@ class TestGroupForm(TestCase):
         form = GroupForm(data=form_data)
         self.assertFalse(form.is_valid())
         self.assertIn('schedule', form.errors)
-        self.assertIn('valid JSON', form.errors['schedule'][0])
+        self.assertTrue(
+            'valid JSON' in form.errors['schedule'][0] or
+            'Schedule must be valid JSON' in form.errors['schedule'][0]
+        )
 
     @pytest.mark.timeout(30)
     def test_clean_schedule_not_list(self):
