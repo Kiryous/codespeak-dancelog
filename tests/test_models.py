@@ -133,6 +133,7 @@ class TestStudent(TestCase):
         )
 
         # Add some visits
+        from datetime import timedelta
         StudentVisit.objects.create(
             student=student,
             group=self.group,
@@ -142,7 +143,7 @@ class TestStudent(TestCase):
         StudentVisit.objects.create(
             student=student,
             group=self.group,
-            date=date.today(),
+            date=date.today() + timedelta(days=1),
             skipped=True  # Skipped visits don't count
         )
 
@@ -165,11 +166,12 @@ class TestStudent(TestCase):
         )
 
         # Use all 5 lessons
+        from datetime import timedelta
         for i in range(5):
             StudentVisit.objects.create(
                 student=student,
                 group=self.group,
-                date=date.today(),
+                date=date.today() + timedelta(days=i),
                 skipped=False
             )
 

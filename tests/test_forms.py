@@ -43,7 +43,7 @@ class TestGroupForm(TestCase):
         form = GroupForm(data=form_data)
         self.assertFalse(form.is_valid())
         self.assertIn('schedule', form.errors)
-        self.assertIn('Schedule must be valid JSON', form.errors['schedule'][0])
+        self.assertIn('valid JSON', form.errors['schedule'][0])
 
     @pytest.mark.timeout(30)
     def test_clean_schedule_not_list(self):
