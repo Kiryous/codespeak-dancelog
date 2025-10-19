@@ -77,6 +77,35 @@ class TestGroupForm(TestCase):
         self.assertIn('schedule', form.errors)
         self.assertIn('Invalid day: invalid', form.errors['schedule'][0])
 
+    @pytest.mark.timeout(30)
+    def test_clean_schedule_already_list(self):
+        """Test GroupForm.clean_schedule when schedule is already a list"""
+        # kind: unit_tests, original method: django_app.forms.GroupForm.clean_schedule
+        # This tests line 24 - when isinstance(schedule, str) is False
+        form = GroupForm()
+        form.cleaned_data = {
+            'schedule': [{"day": "tue", "time": "19:30"}]  # Already a list
+        }
+        cleaned_schedule = form.clean_schedule()
+        expected = [{"day": "tue", "time": "19:30"}]
+        self.assertEqual(cleaned_schedule, expected)
+
+    @pytest.mark.timeout(30)
+    def test_clean_schedule_missing_keys(self):
+        """Test GroupForm.clean_schedule with missing day or time keys"""
+        # kind: unit_tests, original method: django_app.forms.GroupForm.clean_schedule
+        form_data = {
+            'name': 'Test Group',
+            'schedule': '[{"day": "tue"}]',  # Missing 'time' key
+            'duration': '1hr',
+            'start_at': '2024-01-01',
+            'location': 'Test Location'
+        }
+        form = GroupForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('schedule', form.errors)
+        self.assertIn("must have 'day' and 'time' keys", form.errors['schedule'][0])
+
 
 class TestStudentForm(TestCase):
     """Unit tests for StudentForm"""

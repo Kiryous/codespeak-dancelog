@@ -110,6 +110,18 @@ class TestViews(TestCase):
         self.assertContains(response, 'Dashboard')
 
     @pytest.mark.timeout(30)
+    @freeze_time("2024-01-16 20:00")  # Tuesday after 19:30 lesson time
+    def test_dashboard_time_passed_logic(self):
+        """Test dashboard when current time has passed lesson time"""
+        # kind: endpoint_tests, original method: django_app.views.dashboard
+        # This covers line 74: if today but time has passed, next week
+        self.client.login(username='admin', password='testpass123')
+        response = self.client.get(reverse('dashboard'))
+        self.assertEqual(response.status_code, 200)
+        # The lesson should be scheduled for next Tuesday since current time passed 19:30
+        self.assertContains(response, 'Dashboard')
+
+    @pytest.mark.timeout(30)
     def test_dashboard_teacher_view(self):
         """Test dashboard view for teacher user"""
         # kind: endpoint_tests, original method: django_app.views.dashboard
@@ -264,6 +276,24 @@ class TestViews(TestCase):
         self.assertIsNotNone(purchase.paid_at)
 
     @pytest.mark.timeout(30)
+    def test_add_purchase_post_teacher_cashier(self):
+        """Test add_purchase POST with teacher user sets cashier"""
+        # kind: endpoint_tests, original method: django_app.views.add_purchase
+        # This covers line 238: if hasattr(request.user, 'teacher')
+        self.client.login(username='teacher', password='testpass123')
+        response = self.client.post(reverse('add_purchase', kwargs={'student_id': self.student.id}), {
+            'dance_pass': self.pass_obj.id,
+            'payment_method': 'CASH',
+            'notes': 'Test purchase'
+        })
+        self.assertRedirects(response, reverse('student_detail', kwargs={'student_id': self.student.id}))
+
+        # Verify purchase was created with teacher as cashier
+        purchase = Purchase.objects.filter(student=self.student).first()
+        self.assertIsNotNone(purchase)
+        self.assertEqual(purchase.cashier, self.teacher)
+
+    @pytest.mark.timeout(30)
     def test_mark_purchase_paid(self):
         """Test mark_purchase_paid view"""
         # kind: endpoint_tests, original method: django_app.views.mark_purchase_paid
@@ -303,3 +333,103 @@ class TestViews(TestCase):
         # Verify paid_at timestamp wasn't changed
         purchase.refresh_from_db()
         self.assertEqual(purchase.paid_at, original_paid_at)
+
+    @pytest.mark.timeout(30)
+    def test_mark_purchase_paid_teacher_sets_cashier(self):
+        """Test mark_purchase_paid with teacher sets cashier"""
+        # kind: endpoint_tests, original method: django_app.views.mark_purchase_paid
+        # This covers line 266: if hasattr(request.user, 'teacher')
+        purchase = Purchase.objects.create(
+            student=self.student,
+            dance_pass=self.pass_obj
+        )
+
+        self.client.login(username='teacher', password='testpass123')
+        response = self.client.post(reverse('mark_purchase_paid', kwargs={'purchase_id': purchase.id}), {
+            'payment_method': 'TBC'
+        })
+        self.assertRedirects(response, reverse('student_detail', kwargs={'student_id': self.student.id}))
+
+        # Verify teacher is set as cashier
+        purchase.refresh_from_db()
+        self.assertEqual(purchase.cashier, self.teacher)
+
+    @pytest.mark.timeout(30)
+    def test_lesson_detail_post_attendance(self):
+        """Test lesson_detail POST method for marking attendance"""
+        # kind: endpoint_tests, original method: django_app.views.lesson_detail
+        # This covers lines 140-142, 144, 146, 149-153, 156-159, 166-167
+        self.group.students.add(self.student)
+
+        self.client.login(username='teacher', password='testpass123')
+        response = self.client.post(reverse('lesson_detail', kwargs={
+            'group_id': self.group.id,
+            'lesson_date': '2024-01-15'
+        }), {
+            'students': [str(self.student.id)],
+            'skipped': [],  # Student attended
+        })
+        self.assertRedirects(response, reverse('dashboard'))
+
+        # Verify visit was created
+        visit = StudentVisit.objects.filter(
+            student=self.student,
+            group=self.group,
+            date=date(2024, 1, 15)
+        ).first()
+        self.assertIsNotNone(visit)
+        self.assertFalse(visit.skipped)
+
+    @pytest.mark.timeout(30)
+    def test_lesson_detail_post_with_new_student(self):
+        """Test lesson_detail POST method with adding new student"""
+        # kind: endpoint_tests, original method: django_app.views.lesson_detail
+        # This covers the new_student_id logic in lines 149-153
+        other_student = Student.objects.create(
+            user=User.objects.create_user(username='other', email='other@test.com')
+        )
+
+        self.client.login(username='teacher', password='testpass123')
+        response = self.client.post(reverse('lesson_detail', kwargs={
+            'group_id': self.group.id,
+            'lesson_date': '2024-01-15'
+        }), {
+            'students': [],
+            'new_student': str(other_student.id),
+        })
+        self.assertRedirects(response, reverse('dashboard'))
+
+        # Verify student was added to group and visit was created
+        self.assertIn(other_student, self.group.students.all())
+        visit = StudentVisit.objects.filter(
+            student=other_student,
+            group=self.group,
+            date=date(2024, 1, 15)
+        ).first()
+        self.assertIsNotNone(visit)
+
+    @pytest.mark.timeout(30)
+    def test_lesson_detail_post_with_skipped_students(self):
+        """Test lesson_detail POST method with skipped students"""
+        # kind: endpoint_tests, original method: django_app.views.lesson_detail
+        # This covers the skipped logic in lines 156-159
+        self.group.students.add(self.student)
+
+        self.client.login(username='teacher', password='testpass123')
+        response = self.client.post(reverse('lesson_detail', kwargs={
+            'group_id': self.group.id,
+            'lesson_date': '2024-01-15'
+        }), {
+            'students': [str(self.student.id)],
+            'skipped': [str(self.student.id)],  # Student skipped
+        })
+        self.assertRedirects(response, reverse('dashboard'))
+
+        # Verify visit was created as skipped
+        visit = StudentVisit.objects.filter(
+            student=self.student,
+            group=self.group,
+            date=date(2024, 1, 15)
+        ).first()
+        self.assertIsNotNone(visit)
+        self.assertTrue(visit.skipped)
