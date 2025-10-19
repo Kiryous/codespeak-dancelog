@@ -1,0 +1,58 @@
+{% extends 'django_app/base.html' %}
+
+{% block title %}Add Purchase - {{ student }} - Dancelog CRM{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1>Add Purchase for {{ student }}</h1>
+    <p class="text-muted">{{ student.user.email }}</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="{{ form.dance_pass.id_for_label }}">{{ form.dance_pass.label }}</label>
+            {{ form.dance_pass }}
+            {% if form.dance_pass.errors %}
+                <div class="text-error">{{ form.dance_pass.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.payment_method.id_for_label }}">{{ form.payment_method.label }}</label>
+            {{ form.payment_method }}
+            <small class="text-muted">Leave empty if payment hasn't been processed yet</small>
+            {% if form.payment_method.errors %}
+                <div class="text-error">{{ form.payment_method.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.notes.id_for_label }}">{{ form.notes.label }}</label>
+            {{ form.notes }}
+            {% if form.notes.errors %}
+                <div class="text-error">{{ form.notes.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <button type="submit" class="btn">Add Purchase</button>
+            <a href="{% url 'student_detail' student.id %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const passSelect = document.getElementById('{{ form.dance_pass.id_for_label }}');
+    const paymentMethodSelect = document.getElementById('{{ form.payment_method.id_for_label }}');
+
+    // Auto-mark as paid if payment method is selected
+    paymentMethodSelect.addEventListener('change', function() {
+        if (this.value) {
+            // This will be handled by the view - if payment method is selected,
+            // the purchase will be marked as paid immediately
+        }
+    });
+});
+</script>
+{% endblock %}

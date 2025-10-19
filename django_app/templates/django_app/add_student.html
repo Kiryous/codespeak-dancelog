@@ -1,0 +1,77 @@
+{% extends 'django_app/base.html' %}
+
+{% block title %}Add Student - Dancelog CRM{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1>Add New Student</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="grid grid-2">
+            <div class="form-group">
+                <label for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
+                {{ form.first_name }}
+                {% if form.first_name.errors %}
+                    <div class="text-error">{{ form.first_name.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
+                {{ form.last_name }}
+                {% if form.last_name.errors %}
+                    <div class="text-error">{{ form.last_name.errors }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+            {{ form.email }}
+            {% if form.email.errors %}
+                <div class="text-error">{{ form.email.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+            {{ form.username }}
+            <small class="text-muted">{{ form.username.help_text }}</small>
+            {% if form.username.errors %}
+                <div class="text-error">{{ form.username.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.phone.id_for_label }}">{{ form.phone.label }}</label>
+            {{ form.phone }}
+            {% if form.phone.errors %}
+                <div class="text-error">{{ form.phone.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.groups.id_for_label }}">{{ form.groups.label }}</label>
+            {{ form.groups }}
+            <small class="text-muted">Hold Ctrl/Cmd to select multiple groups</small>
+            {% if form.groups.errors %}
+                <div class="text-error">{{ form.groups.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.notes.id_for_label }}">{{ form.notes.label }}</label>
+            {{ form.notes }}
+            {% if form.notes.errors %}
+                <div class="text-error">{{ form.notes.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <button type="submit" class="btn">Add Student</button>
+            <a href="{% url 'students' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

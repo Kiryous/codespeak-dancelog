@@ -1,0 +1,177 @@
+{
+    "django_app/forms.py": [
+        {
+            "method": {
+                "enclosing_classes": [
+                    "StudentForm"
+                ],
+                "method_name": "__init__"
+            },
+            "kind": "unit_tests"
+        },
+        {
+            "method": {
+                "enclosing_classes": [
+                    "PurchaseForm"
+                ],
+                "method_name": "__init__"
+            },
+            "kind": "unit_tests"
+        },
+        {
+            "method": {
+                "enclosing_classes": [
+                    "StudentVisitForm"
+                ],
+                "method_name": "__init__"
+            },
+            "kind": "unit_tests"
+        },
+        {
+            "method": {
+                "enclosing_classes": [
+                    "GroupForm"
+                ],
+                "method_name": "clean_schedule"
+            },
+            "kind": "unit_tests"
+        },
+        {
+            "method": {
+                "enclosing_classes": [
+                    "StudentForm"
+                ],
+                "method_name": "save"
+            },
+            "kind": "unit_tests"
+        },
+        {
+            "method": {
+                "enclosing_classes": [
+                    "NewStudentForm"
+                ],
+                "method_name": "save"
+            },
+            "kind": "unit_tests"
+        }
+    ],
+    "django_app/models.py": [
+        {
+            "method": {
+                "enclosing_classes": [
+                    "Teacher"
+                ],
+                "method_name": "__str__"
+            },
+            "kind": "unit_tests"
+        },
+        {
+            "method": {
+                "enclosing_classes": [
+                    "Student"
+                ],
+                "method_name": "__str__"
+            },
+            "kind": "unit_tests"
+        },
+        {
+            "method": {
+                "enclosing_classes": [
+                    "StudentVisit"
+                ],
+                "method_name": "__str__"
+            },
+            "kind": "unit_tests"
+        },
+        {
+            "method": {
+                "enclosing_classes": [
+                    "Purchase"
+                ],
+                "method_name": "__str__"
+            },
+            "kind": "unit_tests"
+        },
+        {
+            "method": {
+                "enclosing_classes": [
+                    "Student"
+                ],
+                "method_name": "get_active_passes"
+            },
+            "kind": "unit_tests"
+        }
+    ],
+    "django_app/views.py": [
+        {
+            "method": {
+                "enclosing_classes": [],
+                "method_name": "add_group"
+            },
+            "kind": "endpoint_tests"
+        },
+        {
+            "method": {
+                "enclosing_classes": [],
+                "method_name": "add_purchase"
+            },
+            "kind": "endpoint_tests"
+        },
+        {
+            "method": {
+                "enclosing_classes": [],
+                "method_name": "add_student"
+            },
+            "kind": "endpoint_tests"
+        },
+        {
+            "method": {
+                "enclosing_classes": [],
+                "method_name": "dashboard"
+            },
+            "kind": "endpoint_tests"
+        },
+        {
+            "method": {
+                "enclosing_classes": [],
+                "method_name": "lesson_detail"
+            },
+            "kind": "endpoint_tests"
+        },
+        {
+            "method": {
+                "enclosing_classes": [],
+                "method_name": "login_view"
+            },
+            "kind": "endpoint_tests"
+        },
+        {
+            "method": {
+                "enclosing_classes": [],
+                "method_name": "logout_view"
+            },
+            "kind": "endpoint_tests"
+        },
+        {
+            "method": {
+                "enclosing_classes": [],
+                "method_name": "mark_purchase_paid"
+            },
+            "kind": "endpoint_tests"
+        },
+        {
+            "method": {
+                "enclosing_classes": [],
+                "method_name": "student_detail"
+            },
+            "kind": "endpoint_tests"
+        },
+        {
+            "method": {
+                "enclosing_classes": [],
+                "method_name": "students"
+            },
+            "kind": "endpoint_tests"
+        }
+    ]
+}
