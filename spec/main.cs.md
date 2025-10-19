@@ -1,4 +1,3 @@
-// This is a comment. This line is ignored.
 <!-- This is a multiline comment. 
 These lines are ignored too. -->
 
