@@ -61,7 +61,9 @@
             "web_application": true
         },
         "external_apis": "external_apis.json",
-        "commit_message": "Implement Dancelog CRM for Lindy-Hop dance studio"
+        "commit_message": "Implement Dancelog CRM for Lindy-Hop dance studio",
+        "methods_to_test_raw": "methods_to_test_raw.json",
+        "methods_to_test": "methods_to_test.json"
     },
     "phase_manager": {
         "history": [
@@ -96,6 +98,10 @@
             {
                 "checkpoint": "{\"run\":{\"id\":\"15d6b2be-83a1-4763-889d-e506b683538b\",\"kind\":\"build\"},\"phase_id\":\"FeedbackLoopWithClaudeCode\",\"additional_id\":null}",
                 "timestamp": "2025-10-19T21:25:30.779192+00:00"
+            },
+            {
+                "checkpoint": "{\"run\":{\"id\":\"15d6b2be-83a1-4763-889d-e506b683538b\",\"kind\":\"build\"},\"phase_id\":\"AnalyzeAndPlanTests\",\"additional_id\":null}",
+                "timestamp": "2025-10-19T21:25:41.888599+00:00"
             }
         ]
     }
