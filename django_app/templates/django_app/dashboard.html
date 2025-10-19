@@ -1,0 +1,74 @@
+{% extends 'django_app/base.html' %}
+
+{% block title %}Dashboard - Dancelog CRM{% endblock %}
+
+{% block content %}
+<div class="grid grid-2">
+    <div class="card">
+        <div class="card-header">
+            <h3>Upcoming Lessons</h3>
+        </div>
+        <div class="card-body">
+            {% if upcoming_lessons %}
+                {% for lesson in upcoming_lessons %}
+                    <div class="lesson-item">
+                        <div class="lesson-date">
+                            {{ lesson.date|date:"j M Y" }}<br>
+                            <span class="text-muted">{{ lesson.time }}</span>
+                        </div>
+                        <div class="lesson-details">
+                            <strong>{{ lesson.group.name }}</strong><br>
+                            <span class="text-muted">
+                                {% for teacher in lesson.group.teachers.all %}
+                                    {{ teacher }}{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            </span><br>
+                            <small class="text-muted">{{ lesson.group.location|truncatechars:50 }}</small>
+                        </div>
+                        <div class="lesson-actions">
+                            {% if is_teacher or is_admin %}
+                                <a href="{% url 'lesson_detail' lesson.group.id lesson.date|date:'Y-m-d' %}"
+                                   class="btn btn-small">Mark Attendance</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted">No upcoming lessons scheduled.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div>
+        <div class="card">
+            <div class="card-header">
+                <h3>Quick Actions</h3>
+            </div>
+            <div class="card-body">
+                <div class="grid">
+                    <a href="{% url 'students' %}" class="btn btn-secondary">View All Students</a>
+                    <a href="{% url 'add_student' %}" class="btn btn-secondary">Add New Student</a>
+                    {% if is_admin %}
+                        <a href="{% url 'add_group' %}" class="btn btn-secondary">Add New Group</a>
+                    {% endif %}
+                    <a href="/admin/" class="btn btn-secondary">Admin Panel</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3>System Status</h3>
+            </div>
+            <div class="card-body">
+                <p><strong>Role:</strong>
+                    {% if is_admin %}Administrator{% elif is_teacher %}Teacher{% else %}Staff{% endif %}
+                </p>
+                {% if is_teacher %}
+                    <p><strong>My Groups:</strong> {{ user.teacher.groups.count }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

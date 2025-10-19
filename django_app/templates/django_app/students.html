@@ -1,0 +1,68 @@
+{% extends 'django_app/base.html' %}
+
+{% block title %}Students - Dancelog CRM{% endblock %}
+
+{% block content %}
+<div class="mb-3">
+    <h1>Students</h1>
+    <a href="{% url 'add_student' %}" class="btn">Add New Student</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if students %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Groups</th>
+                        <th>Active Passes</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                        <tr>
+                            <td>
+                                <strong>{{ student }}</strong>
+                            </td>
+                            <td>{{ student.user.email }}</td>
+                            <td>{{ student.phone|default:"-" }}</td>
+                            <td>
+                                {% for group in student.groups.all %}
+                                    <span class="badge">{{ group.name }}</span>
+                                    {% if not forloop.last %}, {% endif %}
+                                {% empty %}
+                                    <span class="text-muted">None</span>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                {% with active_passes=student.get_active_passes %}
+                                    {% if active_passes %}
+                                        {% for pass_info in active_passes %}
+                                            <div class="mb-1">
+                                                <strong>{{ pass_info.pass.name }}</strong><br>
+                                                <small class="text-muted">{{ pass_info.remaining_lessons }} lessons remaining</small>
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <span class="text-muted">No active passes</span>
+                                    {% endif %}
+                                {% endwith %}
+                            </td>
+                            <td>
+                                <a href="{% url 'student_detail' student.id %}" class="btn btn-small">View Details</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="text-muted">No students registered yet.</p>
+            <a href="{% url 'add_student' %}" class="btn">Add First Student</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

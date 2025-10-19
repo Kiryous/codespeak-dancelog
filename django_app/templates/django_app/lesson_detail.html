@@ -1,0 +1,116 @@
+{% extends 'django_app/base.html' %}
+
+{% block title %}Mark Attendance - {{ group.name }} - Dancelog CRM{% endblock %}
+
+{% block content %}
+<div class="attendance-form">
+    <h1>Mark Attendance</h1>
+    <div class="mb-3">
+        <h2>{{ group.name }} - {{ lesson_date|date:"l, F j, Y" }}</h2>
+        <p class="text-muted">{{ group.location|linebreaks }}</p>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="card">
+            <div class="card-header">
+                <h3>Students in Group</h3>
+            </div>
+            <div class="card-body">
+                <div class="student-list">
+                    {% for student in group_students %}
+                        {% with visit=existing_visits|default_if_none:student.id %}
+                        <div class="student-item">
+                            <div class="student-checkbox">
+                                <input type="checkbox"
+                                       name="students"
+                                       value="{{ student.id }}"
+                                       {% if visit %}checked{% endif %}
+                                       id="student_{{ student.id }}">
+                                <label for="student_{{ student.id }}">Attended</label>
+                            </div>
+
+                            <div class="student-name">
+                                <strong>{{ student }}</strong>
+                                {% if student.phone %}
+                                    <br><small class="text-muted">{{ student.phone }}</small>
+                                {% endif %}
+                            </div>
+
+                            <div class="student-status">
+                                <input type="checkbox"
+                                       name="skipped"
+                                       value="{{ student.id }}"
+                                       {% if visit and visit.skipped %}checked{% endif %}
+                                       id="skipped_{{ student.id }}">
+                                <label for="skipped_{{ student.id }}">Skipped</label>
+                            </div>
+                        </div>
+                        {% endwith %}
+                    {% empty %}
+                        <div class="student-item">
+                            <p class="text-muted">No students assigned to this group yet.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        {% if all_students %}
+        <div class="card">
+            <div class="card-header">
+                <h3>Add Student from Other Groups</h3>
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label for="new_student">Select Student</label>
+                    <select name="new_student" id="new_student">
+                        <option value="">-- Select a student --</option>
+                        {% for student in all_students %}
+                            <option value="{{ student.id }}">{{ student }} ({{ student.user.email }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="form-group mt-3">
+            <button type="submit" class="btn">Save Attendance</button>
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle the relationship between attended and skipped checkboxes
+    const attendedCheckboxes = document.querySelectorAll('input[name="students"]');
+    const skippedCheckboxes = document.querySelectorAll('input[name="skipped"]');
+
+    attendedCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const studentId = this.value;
+            const skippedCheckbox = document.getElementById('skipped_' + studentId);
+
+            if (!this.checked) {
+                // If not attended, uncheck skipped
+                skippedCheckbox.checked = false;
+            }
+        });
+    });
+
+    skippedCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            if (this.checked) {
+                const studentId = this.value;
+                const attendedCheckbox = document.getElementById('student_' + studentId);
+                // If skipped, must be attended
+                attendedCheckbox.checked = true;
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

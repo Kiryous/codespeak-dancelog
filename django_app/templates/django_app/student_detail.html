@@ -1,0 +1,127 @@
+{% extends 'django_app/base.html' %}
+
+{% block title %}{{ student }} - Student Details - Dancelog CRM{% endblock %}
+
+{% block content %}
+<div class="mb-3">
+    <h1>{{ student }}</h1>
+    <p class="text-muted">{{ student.user.email }}{% if student.phone %} • {{ student.phone }}{% endif %}</p>
+</div>
+
+<div class="grid grid-2">
+    <!-- Active Passes -->
+    <div class="card">
+        <div class="card-header">
+            <h3>Active Passes</h3>
+        </div>
+        <div class="card-body">
+            {% if active_passes %}
+                {% for pass_info in active_passes %}
+                    <div class="border-bottom mb-2 pb-2">
+                        <strong>{{ pass_info.pass.name }}</strong><br>
+                        <span class="text-muted">{{ pass_info.pass.group.name }}</span><br>
+                        <small>
+                            <strong>{{ pass_info.remaining_lessons }}</strong> lessons remaining
+                            ({{ pass_info.visits_used }}/{{ pass_info.pass.lessons_included }} used)
+                        </small>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted">No active passes</p>
+            {% endif %}
+            <div class="mt-3">
+                <a href="{% url 'add_purchase' student.id %}" class="btn btn-small">Add Purchase</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Visits -->
+    <div class="card">
+        <div class="card-header">
+            <h3>Recent Visits</h3>
+        </div>
+        <div class="card-body">
+            {% if recent_visits %}
+                {% for visit in recent_visits %}
+                    <div class="border-bottom mb-2 pb-2">
+                        <strong>{{ visit.group.name }}</strong><br>
+                        <span class="text-muted">{{ visit.date|date:"M j, Y" }}</span>
+                        {% if visit.skipped %}
+                            <span class="text-warning"> • Skipped</span>
+                        {% else %}
+                            <span class="text-success"> • Attended</span>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted">No visits recorded</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Purchase History -->
+<div class="card">
+    <div class="card-header">
+        <h3>Purchase History</h3>
+    </div>
+    <div class="card-body">
+        {% if purchases %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Pass</th>
+                        <th>Price</th>
+                        <th>Created</th>
+                        <th>Paid</th>
+                        <th>Payment Method</th>
+                        <th>Cashier</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for purchase in purchases %}
+                        <tr>
+                            <td>
+                                <strong>{{ purchase.dance_pass.name }}</strong><br>
+                                <small class="text-muted">{{ purchase.dance_pass.group.name }}</small>
+                            </td>
+                            <td>${{ purchase.dance_pass.price }}</td>
+                            <td>{{ purchase.created_at|date:"M j, Y" }}</td>
+                            <td>
+                                {% if purchase.paid_at %}
+                                    <span class="text-success">{{ purchase.paid_at|date:"M j, Y" }}</span>
+                                {% else %}
+                                    <span class="text-warning">Unpaid</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ purchase.get_payment_method_display|default:"-" }}</td>
+                            <td>{{ purchase.cashier|default:"-" }}</td>
+                            <td>
+                                {% if not purchase.paid_at %}
+                                    <form method="post" action="{% url 'mark_purchase_paid' purchase.id %}" style="display: inline;">
+                                        {% csrf_token %}
+                                        <select name="payment_method" required>
+                                            <option value="">Method</option>
+                                            {% for value, label in purchase.PAYMENT_METHODS %}
+                                                <option value="{{ value }}">{{ label }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <button type="submit" class="btn btn-small">Mark Paid</button>
+                                    </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="text-muted">No purchases recorded</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="mt-3">
+    <a href="{% url 'students' %}" class="btn btn-secondary">Back to Students</a>
+</div>
+{% endblock %}
